@@ -1,0 +1,2656 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CamaraMuslim - Révision du Coran et Apprentissage de l'Islam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .arabic-text {
+            font-family: 'Amiri', 'Traditional Arabic', serif;
+            font-size: 1.5rem;
+            line-height: 2;
+            text-align: right;
+            direction: rtl;
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .islamic-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-16.569 13.431-30 30-30v60c-16.569 0-30-13.431-30-30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .prayer-time {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        .verse-container {
+            border-right: 4px solid #059669;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+        .hadith-container {
+            border-left: 4px solid #d97706;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+        .dua-container {
+            border-left: 4px solid #7c3aed;
+            background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%);
+        }
+        .loading-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen islamic-pattern">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-green-600">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-green-600 p-3 rounded-lg">
+                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">CamaraMuslim</h1>
+                        <p class="text-gray-600">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="prayer-time text-white px-4 py-2 rounded-lg">
+                        <div class="text-sm">Prochaine Prière</div>
+                        <div class="font-bold" id="nextPrayer">Maghrib - 18:30</div>
+                    </div>
+                    <div class="bg-white border border-green-200 px-4 py-2 rounded-lg">
+                        <div class="text-sm text-gray-600" id="currentDate">Lundi 25 Décembre 2023</div>
+                        <div class="font-bold text-green-800" id="currentTime">14:30</div>
+                    </div>
+                    <button onclick="showQiblaFinder()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        <span>🧭 Qibla GPS</span>
+                    </button>
+                    <button onclick="showBoobadevVerses()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg">
+                        ✨ Boobadev
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal Qibla Finder -->
+    <div id="qiblaModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">🧭 Direction de la Qibla</h2>
+                    <button onclick="closeQiblaModal()" class="text-white hover:text-gray-200 text-2xl font-bold">×</button>
+                </div>
+                <p class="text-blue-100 mt-2">Trouvez la direction de la Mecque pour votre prière</p>
+            </div>
+            <div id="qiblaContent" class="p-6">
+                <div class="text-center mb-6">
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg p-4 mb-4">
+                        <h3 class="text-lg font-bold mb-2">📍 Votre Position</h3>
+                        <div id="userLocation" class="text-sm">Localisation en cours...</div>
+                    </div>
+                    
+                    <div class="relative w-64 h-64 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full border-8 border-blue-200 flex items-center justify-center">
+                        <div class="absolute inset-0 rounded-full border-2 border-dashed border-blue-300"></div>
+                        <div id="qiblaCompass" class="w-48 h-48 relative">
+                            <!-- Boussole -->
+                            <div class="absolute inset-0 rounded-full bg-white shadow-lg border-4 border-blue-500 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600 mb-1">🕋</div>
+                                    <div class="text-sm font-medium text-gray-700">Mecque</div>
+                                    <div id="qiblaDirection" class="text-lg font-bold text-green-600 mt-2">---°</div>
+                                </div>
+                            </div>
+                            <!-- Aiguille de direction -->
+                            <div id="qiblaArrow" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-1000" style="transform-origin: center;">
+                                <div class="w-1 h-20 bg-red-500 rounded-full shadow-lg" style="margin-left: -2px; margin-top: -40px;"></div>
+                                <div class="w-4 h-4 bg-red-600 rounded-full absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">Distance vers la Mecque</div>
+                            <div id="distanceToMecca" class="text-lg font-bold text-blue-600">--- km</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">Direction Qibla</div>
+                            <div id="qiblaAngle" class="text-lg font-bold text-green-600">---°</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="getCurrentLocation()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                            📍 Actualiser ma position
+                        </button>
+                        <button onclick="calibrateCompass()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                            🧭 Calibrer la boussole
+                        </button>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-start space-x-2">
+                            <div class="text-yellow-600 mt-1">⚠️</div>
+                            <div class="text-sm text-yellow-800">
+                                <strong>Instructions :</strong><br>
+                                1. Autorisez l'accès à votre localisation<br>
+                                2. Tenez votre appareil à plat<br>
+                                3. Orientez-vous selon la flèche rouge<br>
+                                4. La Qibla est dans cette direction
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Boobadev -->
+    <div id="boobadevModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">✨ Boobadev - Versets Sensibles du Coran</h2>
+                    <button onclick="closeBoobadevModal()" class="text-white hover:text-gray-200 text-2xl font-bold">×</button>
+                </div>
+                <p class="text-purple-100 mt-2">Les versets les plus touchants et profonds du Saint Coran</p>
+            </div>
+            <div id="boobadevContent" class="p-6 overflow-y-auto max-h-[70vh]">
+                <!-- Le contenu sera généré ici -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Écran d'inscription -->
+    <div id="registrationScreen" class="min-h-screen flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <div class="text-center mb-8">
+                <div class="bg-green-600 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Bienvenue sur CamaraMuslim</h2>
+                <p class="text-gray-600">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</p>
+                <p class="text-sm text-gray-500 mt-2">Inscrivez-vous pour commencer votre apprentissage</p>
+            </div>
+
+            <form id="registrationForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+                    <input type="text" id="firstName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Votre prénom">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                    <input type="text" id="lastName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Votre nom de famille">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Niveau dans le Coran *</label>
+                    <select id="quranLevel" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="">Sélectionnez votre niveau</option>
+                        <option value="debutant">Débutant - Je commence l'apprentissage</option>
+                        <option value="intermediaire">Intermédiaire - Je connais quelques sourates</option>
+                        <option value="avance">Avancé - Je maîtrise plusieurs sourates</option>
+                        <option value="hafiz">Hafiz - J'ai mémorisé le Coran</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Créez un mot de passe">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
+                    <input type="password" id="confirmPassword" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Confirmez votre mot de passe">
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" id="acceptTerms" required class="w-4 h-4 text-green-600 rounded">
+                    <label for="acceptTerms" class="ml-2 text-sm text-gray-600">
+                        J'accepte les conditions d'utilisation et la politique de confidentialité
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg">
+                    🚀 Commencer mon apprentissage
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-xs text-gray-500">
+                    Déjà inscrit ? 
+                    <button onclick="showLoginForm()" class="text-green-600 hover:text-green-700 font-medium">Se connecter</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Écran de connexion -->
+    <div id="loginScreen" class="hidden min-h-screen flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <div class="text-center mb-8">
+                <div class="bg-green-600 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Connexion</h2>
+                <p class="text-gray-600">أهلاً وسهلاً بك</p>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                    <input type="text" id="loginFirstName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Votre prénom">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Votre mot de passe">
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg">
+                    🔑 Se connecter
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-xs text-gray-500">
+                    Pas encore inscrit ? 
+                    <button onclick="showRegistrationForm()" class="text-green-600 hover:text-green-700 font-medium">S'inscrire</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interface principale -->
+    <div id="mainInterface" class="hidden">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Navigation Tabs -->
+        <div class="bg-white rounded-xl shadow-lg mb-8">
+            <div class="flex flex-wrap border-b border-gray-200">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-active px-6 py-4 font-medium rounded-tl-xl transition-all">
+                    🏠 Accueil
+                </button>
+                <button onclick="switchTab('quran')" id="tab-quran" class="px-6 py-4 font-medium text-gray-600 hover:text-green-600 transition-all">
+                    📖 Coran
+                </button>
+                <button onclick="switchTab('hadith')" id="tab-hadith" class="px-6 py-4 font-medium text-gray-600 hover:text-green-600 transition-all">
+                    📚 Hadith
+                </button>
+                <button onclick="switchTab('dua')" id="tab-dua" class="px-6 py-4 font-medium text-gray-600 hover:text-green-600 transition-all">
+                    🤲 Invocations
+                </button>
+                <button onclick="switchTab('prayer')" id="tab-prayer" class="px-6 py-4 font-medium text-gray-600 hover:text-green-600 transition-all">
+                    🕌 Prières
+                </button>
+                <button onclick="switchTab('learning')" id="tab-learning" class="px-6 py-4 font-medium text-gray-600 hover:text-green-600 transition-all">
+                    📝 Apprentissage
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="px-6 py-4 font-medium text-gray-600 hover:text-green-600 rounded-tr-xl transition-all">
+                    🎯 Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="content-dashboard" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Verset du jour -->
+                <div class="col-span-full bg-white rounded-xl shadow-lg p-6 verse-container">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-green-600 text-white p-2 rounded-lg mr-3">📖</span>
+                        Verset du Jour
+                    </h3>
+                    <div class="arabic-text text-green-800 mb-4" id="dailyVerse">
+                        وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا
+                    </div>
+                    <div class="text-gray-700 mb-2" id="dailyVerseTranslation">
+                        "Et quiconque craint Allah, Il lui donnera une issue favorable"
+                    </div>
+                    <div class="text-sm text-gray-500" id="dailyVerseReference">Sourate At-Talaq (65:2)</div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Progression</h3>
+                        <div class="bg-green-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Coran lu</span>
+                                <span id="quranProgress">0%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div id="quranProgressBar" class="bg-green-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Hadiths étudiés</span>
+                                <span id="hadithProgress">0</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div id="hadithProgressBar" class="bg-orange-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Horaires de prière -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="bg-green-600 text-white p-1 rounded mr-2">🕌</span>
+                        Horaires de Prière
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Fajr</span>
+                            <span class="font-medium">05:30</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Dhuhr</span>
+                            <span class="font-medium">13:15</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Asr</span>
+                            <span class="font-medium">16:45</span>
+                        </div>
+                        <div class="flex justify-between bg-green-50 p-2 rounded">
+                            <span class="font-medium">Maghrib</span>
+                            <span class="font-bold text-green-600">18:30</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Isha</span>
+                            <span class="font-medium">20:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Objectifs quotidiens -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Objectifs du Jour</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" class="w-4 h-4 text-green-600 rounded">
+                            <span class="text-sm">Lire 1 page du Coran</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" class="w-4 h-4 text-green-600 rounded">
+                            <span class="text-sm">Apprendre 1 hadith</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" class="w-4 h-4 text-green-600 rounded">
+                            <span class="text-sm">Faire le dhikr du matin</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" class="w-4 h-4 text-green-600 rounded">
+                            <span class="text-sm">Réviser une invocation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quran Tab -->
+        <div id="content-quran" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Liste des sourates -->
+                <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Sourates</h3>
+                    <div class="space-y-2 max-h-96 overflow-y-auto" id="surahList">
+                        <!-- Les sourates seront générées ici -->
+                    </div>
+                </div>
+
+                <!-- Contenu du Coran -->
+                <div class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-800" id="currentSurahTitle">Al-Fatiha (L'Ouverture)</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="previousVerse()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">←</button>
+                            <button onclick="nextVerse()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">→</button>
+                        </div>
+                    </div>
+                    
+                    <div id="quranContent" class="space-y-6">
+                        <!-- Le contenu du Coran sera affiché ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hadith Tab -->
+        <div id="content-hadith" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Catégories de hadiths -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Collections</h3>
+                    <div class="space-y-2">
+                        <button onclick="loadHadithCollection('bukhari')" class="w-full text-left p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                            📚 Sahih Al-Bukhari
+                        </button>
+                        <button onclick="loadHadithCollection('muslim')" class="w-full text-left p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                            📚 Sahih Muslim
+                        </button>
+                        <button onclick="loadHadithCollection('tirmidhi')" class="w-full text-left p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                            📚 Jami' At-Tirmidhi
+                        </button>
+                        <button onclick="loadHadithCollection('abudawud')" class="w-full text-left p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                            📚 Sunan Abu Dawud
+                        </button>
+                        <button onclick="loadHadithCollection('nasai')" class="w-full text-left p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                            📚 Sunan An-Nasa'i
+                        </button>
+                        <button onclick="loadHadithCollection('majah')" class="w-full text-left p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                            📚 Sunan Ibn Majah
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenu des hadiths -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Hadith du Jour</h3>
+                    <div id="hadithContent" class="hadith-container p-6 rounded-lg">
+                        <div class="arabic-text text-orange-800 mb-4">
+                            إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى
+                        </div>
+                        <div class="text-gray-700 mb-4">
+                            "Les actions ne valent que par les intentions, et chacun n'obtient que ce qu'il a eu l'intention de faire."
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <strong>Rapporté par:</strong> Al-Bukhari et Muslim<br>
+                            <strong>Narrateur:</strong> Omar ibn Al-Khattab (qu'Allah l'agrée)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dua Tab -->
+        <div id="content-dua" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Invocations Quotidiennes</h3>
+                    <div class="space-y-4" id="dailyDuas">
+                        <!-- Les invocations seront générées ici -->
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Dhikr et Tasbih</h3>
+                    <div class="space-y-4">
+                        <div class="dua-container p-4 rounded-lg">
+                            <div class="arabic-text text-purple-800 mb-2">سُبْحَانَ اللَّهِ</div>
+                            <div class="text-sm text-gray-600 mb-2">Subhan Allah (Gloire à Allah)</div>
+                            <div class="flex items-center justify-between">
+                                <button onclick="incrementTasbih('subhan')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">+</button>
+                                <span class="font-bold text-lg" id="subhanCount">0</span>
+                                <button onclick="resetTasbih('subhan')" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm">Reset</button>
+                            </div>
+                        </div>
+
+                        <div class="dua-container p-4 rounded-lg">
+                            <div class="arabic-text text-purple-800 mb-2">الْحَمْدُ لِلَّهِ</div>
+                            <div class="text-sm text-gray-600 mb-2">Alhamdulillah (Louange à Allah)</div>
+                            <div class="flex items-center justify-between">
+                                <button onclick="incrementTasbih('hamd')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">+</button>
+                                <span class="font-bold text-lg" id="hamdCount">0</span>
+                                <button onclick="resetTasbih('hamd')" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm">Reset</button>
+                            </div>
+                        </div>
+
+                        <div class="dua-container p-4 rounded-lg">
+                            <div class="arabic-text text-purple-800 mb-2">اللَّهُ أَكْبَرُ</div>
+                            <div class="text-sm text-gray-600 mb-2">Allahu Akbar (Allah est le plus Grand)</div>
+                            <div class="flex items-center justify-between">
+                                <button onclick="incrementTasbih('takbir')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">+</button>
+                                <span class="font-bold text-lg" id="takbirCount">0</span>
+                                <button onclick="resetTasbih('takbir')" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prayer Tab -->
+        <div id="content-prayer" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Guide de la Prière</h3>
+                    <div class="space-y-4">
+                        <div class="border-l-4 border-green-600 pl-4">
+                            <h4 class="font-bold text-gray-800 mb-2">1. Ablutions (Wudu)</h4>
+                            <p class="text-sm text-gray-600">Se purifier avant la prière selon la Sunnah</p>
+                        </div>
+                        <div class="border-l-4 border-green-600 pl-4">
+                            <h4 class="font-bold text-gray-800 mb-2">2. Orientation (Qibla)</h4>
+                            <p class="text-sm text-gray-600">Se tourner vers la Mecque</p>
+                        </div>
+                        <div class="border-l-4 border-green-600 pl-4">
+                            <h4 class="font-bold text-gray-800 mb-2">3. Intention (Niyyah)</h4>
+                            <p class="text-sm text-gray-600">Formuler l'intention de prier</p>
+                        </div>
+                        <div class="border-l-4 border-green-600 pl-4">
+                            <h4 class="font-bold text-gray-800 mb-2">4. Takbir Al-Ihram</h4>
+                            <div class="arabic-text text-green-800">اللَّهُ أَكْبَرُ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Sourates pour la Prière</h3>
+                    <div class="space-y-4">
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">Al-Fatiha (Obligatoire)</h4>
+                            <div class="arabic-text text-green-800 text-sm">
+                                بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ<br>
+                                الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-800 mb-2">Al-Ikhlas</h4>
+                            <div class="arabic-text text-blue-800 text-sm">
+                                قُلْ هُوَ اللَّهُ أَحَدٌ<br>
+                                اللَّهُ الصَّمَدُ
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-purple-800 mb-2">Al-Falaq</h4>
+                            <div class="arabic-text text-purple-800 text-sm">
+                                قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ<br>
+                                مِن شَرِّ مَا خَلَقَ
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Tab -->
+        <div id="content-learning" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Cours d'Islam</h3>
+                    <div class="space-y-3">
+                        <button onclick="loadLesson('aqida')" class="w-full text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                            📖 Aqida (Croyance)
+                        </button>
+                        <button onclick="loadLesson('fiqh')" class="w-full text-left p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                            ⚖️ Fiqh (Jurisprudence)
+                        </button>
+                        <button onclick="loadLesson('sira')" class="w-full text-left p-3 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors">
+                            👤 Sira (Vie du Prophète)
+                        </button>
+                        <button onclick="loadLesson('akhlaq')" class="w-full text-left p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+                            💎 Akhlaq (Morale)
+                        </button>
+                        <button onclick="loadLesson('tafsir')" class="w-full text-left p-3 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                            📚 Tafsir (Exégèse)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Leçon du Jour</h3>
+                    <div id="lessonContent">
+                        <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-6 mb-6">
+                            <h4 class="text-xl font-bold mb-4">Les Cinq Piliers de l'Islam</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>1. الشهادة - La Shahada (Attestation de foi)</div>
+                                <div>2. الصلاة - As-Salah (La prière)</div>
+                                <div>3. الزكاة - Az-Zakat (L'aumône obligatoire)</div>
+                                <div>4. الصوم - As-Sawm (Le jeûne du Ramadan)</div>
+                                <div>5. الحج - Al-Hajj (Le pèlerinage à la Mecque)</div>
+                            </div>
+                        </div>
+                        <div class="prose max-w-none">
+                            <p class="text-gray-700 leading-relaxed">
+                                Les cinq piliers de l'Islam constituent les fondements de la pratique musulmane. 
+                                Chaque pilier a sa propre importance et contribue à la formation spirituelle du croyant...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="content-quiz" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Quiz Islamique</h3>
+                <div id="quizContainer">
+                    <div class="text-center py-8">
+                        <div class="bg-green-100 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">Testez vos Connaissances</h4>
+                        <p class="text-gray-600 mb-6">Choisissez un type de quiz pour commencer</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <button onclick="startQuiz('quran')" class="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg transition-colors">
+                                📖 Quiz Coran
+                            </button>
+                            <button onclick="startQuiz('hadith')" class="bg-orange-600 hover:bg-orange-700 text-white p-4 rounded-lg transition-colors">
+                                📚 Quiz Hadith
+                            </button>
+                            <button onclick="startQuiz('general')" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition-colors">
+                                🎯 Quiz Général
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <div class="bg-green-600 p-2 rounded-lg mr-3">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+                            </svg>
+                        </div>
+                        CamaraMuslim
+                    </h3>
+                    <p class="text-gray-300 mb-4">
+                        Votre plateforme d'apprentissage islamique complète. 
+                        Apprenez le Coran, les Hadiths et enrichissez vos connaissances religieuses.
+                    </p>
+                    <div class="text-sm text-gray-400">
+                        <p class="mb-1">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</p>
+                        <p>"Et dis: Mon Seigneur, accrois mes connaissances!"</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-green-400">📞 Contact</h4>
+                    <div class="space-y-3 text-gray-300">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                            </svg>
+                            <span>cboubacar288@gmail.com</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                            </svg>
+                            <span>+221 78 419 36 67</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            <span>Ziguinchor / Alwar, Sénégal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-green-400">🌟 Fonctionnalités</h4>
+                    <ul class="space-y-2 text-gray-300 text-sm">
+                        <li class="flex items-center space-x-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Lecture complète du Coran</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Collections de Hadiths authentiques</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Invocations quotidiennes complètes</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Boussole Qibla GPS intégrée</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Quiz interactifs d'apprentissage</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Horaires de prière automatiques</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Versets sensibles sélectionnés</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        © 2024 CamaraMuslim. Développé avec ❤️ pour la Oummah islamique.
+                    </div>
+                    <div class="flex space-x-6 text-sm text-gray-400">
+                        <span>🤲 Qu'Allah nous guide tous</span>
+                        <span>☪️ Islam</span>
+                        <span>📚 Éducation</span>
+                    </div>
+                </div>
+                <div class="text-center mt-4 text-xs text-gray-500">
+                    <p class="arabic-text text-green-400 mb-2">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
+                    <p>"Seigneur, accorde-nous belle part ici-bas, et belle part aussi dans l'au-delà; et protège-nous du châtiment du Feu!"</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Variables globales
+        let currentTab = 'dashboard';
+        let currentSurah = 1;
+        let currentVerse = 1;
+        let tasbihCounts = {
+            subhan: parseInt(localStorage.getItem('subhanCount')) || 0,
+            hamd: parseInt(localStorage.getItem('hamdCount')) || 0,
+            takbir: parseInt(localStorage.getItem('takbirCount')) || 0
+        };
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let hadithsStudied = parseInt(localStorage.getItem('hadithsStudied')) || 0;
+
+        // Base de données du Coran (étendue)
+        const quranData = {
+            1: {
+                name: "Al-Fatiha",
+                nameArabic: "الفاتحة",
+                translation: "L'Ouverture",
+                verses: [
+                    {
+                        arabic: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+                        translation: "Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux",
+                        number: 1
+                    },
+                    {
+                        arabic: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+                        translation: "Louange à Allah, Seigneur de l'univers",
+                        number: 2
+                    },
+                    {
+                        arabic: "الرَّحْمَنِ الرَّحِيمِ",
+                        translation: "Le Tout Miséricordieux, le Très Miséricordieux",
+                        number: 3
+                    },
+                    {
+                        arabic: "مَالِكِ يَوْمِ الدِّينِ",
+                        translation: "Maître du Jour de la rétribution",
+                        number: 4
+                    },
+                    {
+                        arabic: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+                        translation: "C'est Toi [Seul] que nous adorons, et c'est Toi [Seul] dont nous implorons secours",
+                        number: 5
+                    },
+                    {
+                        arabic: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+                        translation: "Guide-nous dans le droit chemin",
+                        number: 6
+                    },
+                    {
+                        arabic: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+                        translation: "le chemin de ceux que Tu as comblés de faveurs, non pas de ceux qui have encouru Ta colère, ni des égarés",
+                        number: 7
+                    }
+                ]
+            },
+            2: {
+                name: "Al-Baqarah",
+                nameArabic: "البقرة",
+                translation: "La Vache",
+                verses: [
+                    {
+                        arabic: "الم",
+                        translation: "Alif, Lam, Mim",
+                        number: 1
+                    },
+                    {
+                        arabic: "ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ",
+                        translation: "Ce Livre n'est l'objet d'aucun doute, c'est un guide pour les pieux",
+                        number: 2
+                    },
+                    {
+                        arabic: "الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنفِقُونَ",
+                        translation: "qui croient à l'invisible et accomplissent la Salat et dépensent [dans l'obéissance à Allah], de ce que Nous leur avons attribué",
+                        number: 3
+                    },
+                    {
+                        arabic: "وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنزِلَ إِلَيْكَ وَمَا أُنزِلَ مِن قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ",
+                        translation: "Ceux qui croient à ce qui t'a été descendu (révélé) et à ce qui a été descendu avant toi et qui croient fermement à la vie future",
+                        number: 4
+                    },
+                    {
+                        arabic: "أُولَئِكَ عَلَى هُدًى مِّن رَّبِّهِمْ وَأُولَئِكَ هُمُ الْمُفْلِحُونَ",
+                        translation: "Ceux-là sont sur le bon chemin de leur Seigneur, et ce sont eux qui réussissent (dans cette vie et dans la vie future)",
+                        number: 5
+                    },
+                    {
+                        arabic: "إِنَّ الَّذِينَ كَفَرُوا سَوَاءٌ عَلَيْهِمْ أَأَنذَرْتَهُمْ أَمْ لَمْ تُنذِرْهُمْ لَا يُؤْمِنُونَ",
+                        translation: "[Mais] ceux qui ne croient pas, c'est égal pour eux que tu les avertisses ou que tu ne les avertisses pas: ils ne croiront jamais",
+                        number: 6
+                    },
+                    {
+                        arabic: "خَتَمَ اللَّهُ عَلَى قُلُوبِهِمْ وَعَلَى سَمْعِهِمْ وَعَلَى أَبْصَارِهِمْ غِشَاوَةٌ وَلَهُمْ عَذَابٌ عَظِيمٌ",
+                        translation: "Allah a scellé leurs cœurs et leurs oreilles; et un voile épais couvre leurs yeux; et pour eux il y aura un grand châtiment",
+                        number: 7
+                    },
+                    {
+                        arabic: "وَمِنَ النَّاسِ مَن يَقُولُ آمَنَّا بِاللَّهِ وَبِالْيَوْمِ الْآخِرِ وَمَا هُم بِمُؤْمِنِينَ",
+                        translation: "Il y a parmi les gens qui disent: «Nous croyons en Allah et au Jour dernier!» tandis qu'en fait, ils n'y croient pas",
+                        number: 8
+                    },
+                    {
+                        arabic: "يُخَادِعُونَ اللَّهَ وَالَّذِينَ آمَنُوا وَمَا يَخْدَعُونَ إِلَّا أَنفُسَهُمْ وَمَا يَشْعُرُونَ",
+                        translation: "Ils cherchent à tromper Allah et les croyants; mais ils ne trompent qu'eux-mêmes, et ils ne s'en rendent pas compte",
+                        number: 9
+                    },
+                    {
+                        arabic: "فِي قُلُوبِهِم مَّرَضٌ فَزَادَهُمُ اللَّهُ مَرَضًا وَلَهُمْ عَذَابٌ أَلِيمٌ بِمَا كَانُوا يَكْذِبُونَ",
+                        translation: "Il y a dans leurs cœurs une maladie (de doute et d'hypocrisie), et Allah laisse croître leur maladie. Ils auront un châtiment douloureux, pour avoir menti",
+                        number: 10
+                    }
+                ]
+            },
+            3: {
+                name: "Ali 'Imran",
+                nameArabic: "آل عمران",
+                translation: "La Famille d'Imran",
+                verses: [
+                    {
+                        arabic: "الم",
+                        translation: "Alif, Lam, Mim",
+                        number: 1
+                    },
+                    {
+                        arabic: "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
+                        translation: "Allah! Point de divinité à part Lui, le Vivant, Celui qui subsiste par lui-même «al-Qayyum»",
+                        number: 2
+                    },
+                    {
+                        arabic: "نَزَّلَ عَلَيْكَ الْكِتَابَ بِالْحَقِّ مُصَدِّقًا لِّمَا بَيْنَ يَدَيْهِ وَأَنزَلَ التَّوْرَاةَ وَالْإِنجِيلَ",
+                        translation: "Il a fait descendre sur toi le Livre avec la vérité, confirmant les Livres descendus avant lui. Et Il fit descendre la Thora et l'Évangile",
+                        number: 3
+                    }
+                ]
+            },
+            109: {
+                name: "Al-Kafirun",
+                nameArabic: "الكافرون",
+                translation: "Les Infidèles",
+                verses: [
+                    {
+                        arabic: "قُلْ يَا أَيُّهَا الْكَافِرُونَ",
+                        translation: "Dis: «Ô vous les infidèles!",
+                        number: 1
+                    },
+                    {
+                        arabic: "لَا أَعْبُدُ مَا تَعْبُدُونَ",
+                        translation: "Je n'adore pas ce que vous adorez",
+                        number: 2
+                    },
+                    {
+                        arabic: "وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ",
+                        translation: "Et vous n'êtes pas adorateurs de ce que j'adore",
+                        number: 3
+                    },
+                    {
+                        arabic: "وَلَا أَنَا عَابِدٌ مَّا عَبَدتُّمْ",
+                        translation: "Je ne suis pas adorateur de ce que vous avez adoré",
+                        number: 4
+                    },
+                    {
+                        arabic: "وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ",
+                        translation: "Et vous n'êtes pas adorateurs de ce que j'adore",
+                        number: 5
+                    },
+                    {
+                        arabic: "لَكُمْ دِينُكُمْ وَلِيَ دِينِ",
+                        translation: "À vous votre religion, et à moi la mienne»",
+                        number: 6
+                    }
+                ]
+            },
+            110: {
+                name: "An-Nasr",
+                nameArabic: "النصر",
+                translation: "Les Secours",
+                verses: [
+                    {
+                        arabic: "إِذَا جَاءَ نَصْرُ اللَّهِ وَالْفَتْحُ",
+                        translation: "Lorsque vient le secours d'Allah ainsi que la victoire",
+                        number: 1
+                    },
+                    {
+                        arabic: "وَرَأَيْتَ النَّاسَ يَدْخُلُونَ فِي دِينِ اللَّهِ أَفْوَاجًا",
+                        translation: "et que tu vois les gens entrer en foule dans la religion d'Allah",
+                        number: 2
+                    },
+                    {
+                        arabic: "فَسَبِّحْ بِحَمْدِ رَبِّكَ وَاسْتَغْفِرْهُ إِنَّهُ كَانَ تَوَّابًا",
+                        translation: "alors, par la louange, célèbre la gloire de ton Seigneur et implore Son pardon. Car c'est Lui le grand Accueillant au repentir",
+                        number: 3
+                    }
+                ]
+            },
+            111: {
+                name: "Al-Masad",
+                nameArabic: "المسد",
+                translation: "Les Fibres",
+                verses: [
+                    {
+                        arabic: "تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ",
+                        translation: "Que périssent les deux mains d'Abu-Lahab et que lui-même périsse",
+                        number: 1
+                    },
+                    {
+                        arabic: "مَا أَغْنَى عَنْهُ مَالُهُ وَمَا كَسَبَ",
+                        translation: "Sa fortune ne lui sert à rien, ni ce qu'il a acquis",
+                        number: 2
+                    },
+                    {
+                        arabic: "سَيَصْلَى نَارًا ذَاتَ لَهَبٍ",
+                        translation: "Il sera brûlé dans un Feu plein de flammes",
+                        number: 3
+                    },
+                    {
+                        arabic: "وَامْرَأَتُهُ حَمَّالَةَ الْحَطَبِ",
+                        translation: "de même sa femme, la porteuse de bois",
+                        number: 4
+                    },
+                    {
+                        arabic: "فِي جِيدِهَا حَبْلٌ مِّن مَّسَدٍ",
+                        translation: "À son cou, une corde de fibres",
+                        number: 5
+                    }
+                ]
+            },
+            112: {
+                name: "Al-Ikhlas",
+                nameArabic: "الإخلاص",
+                translation: "Le Monothéisme Pur",
+                verses: [
+                    {
+                        arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ",
+                        translation: "Dis: «Il est Allah, Unique",
+                        number: 1
+                    },
+                    {
+                        arabic: "اللَّهُ الصَّمَدُ",
+                        translation: "Allah, Le Seul à être imploré pour ce que nous désirons",
+                        number: 2
+                    },
+                    {
+                        arabic: "لَمْ يَلِدْ وَلَمْ يُولَدْ",
+                        translation: "Il n'a jamais engendré, n'a pas été engendré non plus",
+                        number: 3
+                    },
+                    {
+                        arabic: "وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",
+                        translation: "Et nul n'est égal à Lui»",
+                        number: 4
+                    }
+                ]
+            },
+            113: {
+                name: "Al-Falaq",
+                nameArabic: "الفلق",
+                translation: "L'Aube Naissante",
+                verses: [
+                    {
+                        arabic: "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ",
+                        translation: "Dis: «Je cherche protection auprès du Seigneur de l'aube naissante",
+                        number: 1
+                    },
+                    {
+                        arabic: "مِن شَرِّ مَا خَلَقَ",
+                        translation: "contre le mal des êtres qu'Il a créés",
+                        number: 2
+                    },
+                    {
+                        arabic: "وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ",
+                        translation: "contre le mal de l'obscurité quand elle s'approfondit",
+                        number: 3
+                    },
+                    {
+                        arabic: "وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ",
+                        translation: "contre le mal de celles qui soufflent sur les nœuds",
+                        number: 4
+                    },
+                    {
+                        arabic: "وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+                        translation: "et contre le mal de l'envieux quand il envie»",
+                        number: 5
+                    }
+                ]
+            },
+            114: {
+                name: "An-Nas",
+                nameArabic: "الناس",
+                translation: "Les Hommes",
+                verses: [
+                    {
+                        arabic: "قُلْ أَعُوذُ بِرَبِّ النَّاسِ",
+                        translation: "Dis: «Je cherche protection auprès du Seigneur des hommes",
+                        number: 1
+                    },
+                    {
+                        arabic: "مَلِكِ النَّاسِ",
+                        translation: "Le Souverain des hommes",
+                        number: 2
+                    },
+                    {
+                        arabic: "إِلَهِ النَّاسِ",
+                        translation: "Dieu des hommes",
+                        number: 3
+                    },
+                    {
+                        arabic: "مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ",
+                        translation: "contre le mal du mauvais conseiller, furtif",
+                        number: 4
+                    },
+                    {
+                        arabic: "الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ",
+                        translation: "qui souffle le mal dans les poitrines des hommes",
+                        number: 5
+                    },
+                    {
+                        arabic: "مِنَ الْجِنَّةِ وَالنَّاسِ",
+                        translation: "qu'il (le conseiller) soit un djinn, ou un être humain»",
+                        number: 6
+                    }
+                ]
+            }
+        };
+
+        // Base de données des versets sensibles pour Boobadev
+        const boobadevVerses = [
+            {
+                surah: "Al-Baqarah",
+                surahArabic: "البقرة",
+                verse: 255,
+                arabic: "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+                translation: "Allah! Point de divinité à part Lui, le Vivant, Celui qui subsiste par lui-même «al-Qayyum». Ni somnolence ni sommeil ne Le saisissent. À Lui appartient tout ce qui est dans les cieux et sur la terre. Qui peut intercéder auprès de Lui sans Sa permission? Il connaît leur passé et leur futur. Et, de Sa science, ils n'embrassent que ce qu'Il veut. Son Trône «Kursiy» déborde les cieux et la terre, dont la garde ne Lui coûte aucune peine. Et Il est le Très Haut, le Très Grand.",
+                category: "Protection et Grandeur d'Allah"
+            },
+            {
+                surah: "Ar-Rahman",
+                surahArabic: "الرحمن",
+                verse: 13,
+                arabic: "فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ",
+                translation: "Lequel donc des bienfaits de votre Seigneur nierez-vous?",
+                category: "Reconnaissance des bienfaits"
+            },
+            {
+                surah: "Al-Baqarah",
+                surahArabic: "البقرة",
+                verse: 286,
+                arabic: "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ",
+                translation: "Allah n'impose à aucune âme une charge supérieure à sa capacité. Elle sera récompensée du bien qu'elle aura fait, punie du mal qu'elle aura fait. Seigneur, ne nous châtie pas s'il nous arrive d'oublier ou de commettre une erreur. Seigneur! Ne nous charge pas d'un fardeau lourd comme Tu as chargé ceux qui vécurent avant nous. Seigneur! Ne nous impose pas ce que nous ne pouvons supporter, efface nos fautes, pardonne-nous et fais nous miséricorde. Tu es notre Maître, accorde-nous donc la victoire sur les peuples infidèles.",
+                category: "Invocation et Miséricorde"
+            },
+            {
+                surah: "Al-Isra",
+                surahArabic: "الإسراء",
+                verse: 23,
+                arabic: "وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا ۚ إِمَّا يَبْلُغَنَّ عِندَكَ الْكِبَرَ أَحَدُهُمَا أَوْ كِلَاهُمَا فَلَا تَقُل لَّهُمَا أُفٍّ وَلَا تَنْهَرْهُمَا وَقُل لَّهُمَا قَوْلًا كَرِيمًا",
+                translation: "Et ton Seigneur a décrété: «n'adorez que Lui; et marquez de la bonté envers les père et mère: si l'un d'eux ou tous deux doivent atteindre la vieillesse auprès de toi; alors ne leur dis point: «Fi!» et ne les brusque pas, mais adresse-leur des paroles respectueuses.",
+                category: "Respect des parents"
+            },
+            {
+                surah: "An-Nur",
+                surahArabic: "النور",
+                verse: 35,
+                arabic: "اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ ۚ مَثَلُ نُورِهِ كَمِشْكَاةٍ فِيهَا مِصْبَاحٌ ۖ الْمِصْبَاحُ فِي زُجَاجَةٍ ۖ الزُّجَاجَةُ كَأَنَّهَا كَوْكَبٌ دُرِّيٌّ يُوقَدُ مِن شَجَرَةٍ مُّبَارَكَةٍ زَيْتُونَةٍ لَّا شَرْقِيَّةٍ وَلَا غَرْبِيَّةٍ يَكَادُ زَيْتُهَا يُضِيءُ وَلَوْ لَمْ تَمْسَسْهُ نَارٌ ۚ نُّورٌ عَلَىٰ نُورٍ ۗ يَهْدِي اللَّهُ لِنُورِهِ مَن يَشَاءُ",
+                translation: "Allah est la Lumière des cieux et de la terre. Sa lumière est semblable à une niche où se trouve une lampe. La lampe est dans un (récipient de) cristal et celui-ci ressemble à un astre de grand éclat; son combustible vient d'un arbre béni: un olivier ni oriental ni occidental dont l'huile semble éclairer sans même que le feu la touche. Lumière sur lumière. Allah guide vers Sa lumière qui Il veut.",
+                category: "Lumière divine"
+            },
+            {
+                surah: "Ash-Shura",
+                surahArabic: "الشورى",
+                verse: 30,
+                arabic: "وَمَا أَصَابَكُم مِّن مُّصِيبَةٍ فَبِمَا كَسَبَتْ أَيْدِيكُمْ وَيَعْفُو عَن كَثِيرٍ",
+                translation: "Tout malheur qui vous atteint est dû à ce que vos mains ont acquis. Et Il pardonne beaucoup.",
+                category: "Épreuves et Pardon"
+            },
+            {
+                surah: "Al-Anfal",
+                surahArabic: "الأنفال",
+                verse: 2,
+                arabic: "إِنَّمَا الْمُؤْمِنُونَ الَّذِينَ إِذَا ذُكِرَ اللَّهُ وَجِلَتْ قُلُوبُهُمْ وَإِذَا تُلِيَتْ عَلَيْهِمْ آيَاتُهُ زَادَتْهُمْ إِيمَانًا وَعَلَىٰ رَبِّهِمْ يَتَوَكَّلُونَ",
+                translation: "Les vrais croyants sont ceux dont les cœurs frémissent quand on mentionne Allah. Et quand Ses versets leur sont récités, cela fait augmenter leur foi. Et ils placent leur confiance en leur Seigneur.",
+                category: "Caractéristiques des croyants"
+            },
+            {
+                surah: "Fussilat",
+                surahArabic: "فصلت",
+                verse: 34,
+                arabic: "وَلَا تَسْتَوِي الْحَسَنَةُ وَلَا السَّيِّئَةُ ۚ ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ فَإِذَا الَّذِي بَيْنَكَ وَبَيْنَهُ عَدَاوَةٌ كَأَنَّهُ وَلِيٌّ حَمِيمٌ",
+                translation: "La bonne action et la mauvaise ne sont pas pareilles. Repousse (le mal) par ce qui est meilleur; et voilà que celui avec qui tu avais une animosité devient comme un ami chaleureux.",
+                category: "Noble comportement"
+            },
+            {
+                surah: "Az-Zumar",
+                surahArabic: "الزمر",
+                verse: 53,
+                arabic: "قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَىٰ أَنفُسِهِمْ لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ ۚ إِنَّ اللَّهَ يَغْفِرُ الذُّنُوبَ جَمِيعًا ۚ إِنَّهُ هُوَ الْغَفُورُ الرَّحِيمُ",
+                translation: "Dis: «Ô Mes serviteurs qui avez commis des excès à votre propre détriment, ne désespérez pas de la miséricorde d'Allah. Car Allah pardonne tous les péchés. Oui, c'est Lui le Pardonneur, le Très Miséricordieux».",
+                category: "Espoir et Repentir"
+            },
+            {
+                surah: "Al-Hadid",
+                surahArabic: "الحديد",
+                verse: 20,
+                arabic: "اعْلَمُوا أَنَّمَا الْحَيَاةُ الدُّنْيَا لَعِبٌ وَلَهْوٌ وَزِينَةٌ وَتَفَاخُرٌ بَيْنَكُمْ وَتَكَاثُرٌ فِي الْأَمْوَالِ وَالْأَوْلَادِ ۖ كَمَثَلِ غَيْثٍ أَعْجَبَ الْكُفَّارَ نَبَاتُهُ ثُمَّ يَهِيجُ فَتَرَاهُ مُصْفَرًّا ثُمَّ يَكُونُ حُطَامًا ۖ وَفِي الْآخِرَةِ عَذَابٌ شَدِيدٌ وَمَغْفِرَةٌ مِّنَ اللَّهِ وَرِضْوَانٌ ۚ وَمَا الْحَيَاةُ الدُّنْيَا إِلَّا مَتَاعُ الْغُرُورِ",
+                translation: "Sachez que la vie présente n'est que jeu, amusement, vaine parure, une course à l'orgueil entre vous et une rivalité dans l'acquisition des richesses et des enfants. Elle est en cela pareille à une pluie: la végétation qui en vient émerveille les cultivateurs, puis elle se fane et tu la vois donc jaunie; ensuite elle devient des débris. Et dans l'au-delà, il y a un châtiment sévère, et aussi pardon et agrément d'Allah. Et la vie présente n'est que jouissance trompeuse.",
+                category: "Réflexion sur la vie"
+            }
+        ];
+
+        // Base de données des invocations complètes
+        const duaData = [
+            // Invocations du matin (Adhkar As-Sabah)
+            {
+                title: "Invocation du matin - 1",
+                arabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+                translation: "Nous voici au matin et le royaume appartient à Allah. Louange à Allah. Il n'y a de divinité qu'Allah Seul, sans associé. À Lui la royauté, à Lui la louange et Il est capable de toute chose",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Invocation du matin - 2",
+                arabic: "رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+                translation: "Seigneur, je Te demande le bien de ce jour et le bien de ce qui vient après. Je cherche refuge auprès de Toi contre le mal de ce jour et le mal de ce qui vient après. Seigneur, je cherche refuge auprès de Toi contre la paresse et la sénilité. Seigneur, je cherche refuge auprès de Toi contre le châtiment du Feu et le châtiment de la tombe",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Invocation du matin - 3",
+                arabic: "اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
+                translation: "Ô Allah, c'est par Toi que nous entrons dans la matinée, par Toi que nous entrons dans la soirée, par Toi que nous vivons, par Toi que nous mourons et vers Toi est la résurrection",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Invocation du matin - 4",
+                arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+                translation: "Ô Allah, Tu es mon Seigneur, il n'y a de divinité que Toi. Tu m'as créé et je suis Ton serviteur. Je respecte Ton pacte et Ta promesse autant que je le peux. Je cherche refuge auprès de Toi contre le mal que j'ai commis. Je reconnais Tes bienfaits sur moi et je reconnais mes péchés. Pardonne-moi car nul autre que Toi ne pardonne les péchés",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Invocation du matin - 5",
+                arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+                translation: "Ô Allah, je Te demande la santé dans ce monde et dans l'au-delà. Ô Allah, je Te demande le pardon et la santé dans ma religion, ma vie d'ici-bas, ma famille et mes biens. Ô Allah, cache mes défauts et rassure-moi de mes frayeurs. Ô Allah, protège-moi devant moi, derrière moi, à ma droite, à ma gauche et au-dessus de moi. Je cherche refuge dans Ta grandeur pour ne pas être englouti par en-dessous",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Invocation du matin - 6",
+                arabic: "اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ",
+                translation: "Ô Allah, Connaisseur de l'invisible et du visible, Créateur des cieux et de la terre, Seigneur et Souverain de toute chose, j'atteste qu'il n'y a de divinité que Toi. Je cherche refuge auprès de Toi contre le mal de mon âme, contre le mal du diable et son polythéisme",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Invocation du matin - 7",
+                arabic: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+                translation: "Au nom d'Allah, avec le nom duquel rien sur terre ni dans le ciel ne peut nuire, et Il est l'Audient, l'Omniscient",
+                category: "morning",
+                time: "Matin (3 fois)"
+            },
+            {
+                title: "Invocation du matin - 8",
+                arabic: "رَضِيتُ بِاللَّهِ رَبًّا وَبِالْإِسْلَامِ دِينًا وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ رَسُولًا",
+                translation: "J'agrée Allah comme Seigneur, l'Islam comme religion et Muhammad (que la paix et le salut d'Allah soient sur lui) comme Messager",
+                category: "morning",
+                time: "Matin (3 fois)"
+            },
+            {
+                title: "Invocation du matin - 9",
+                arabic: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي دِينِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ",
+                translation: "Ô Vivant, ô Subsistant par Toi-même, par Ta miséricorde j'implore Ton secours. Réforme pour moi toute ma religion et ne m'abandonne pas à moi-même ne serait-ce que le temps d'un clin d'œil",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Invocation du matin - 10",
+                arabic: "أَصْبَحْنَا عَلَى فِطْرَةِ الْإِسْلَامِ وَعَلَى كَلِمَةِ الْإِخْلَاصِ وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ",
+                translation: "Nous voici au matin sur la nature primordiale de l'Islam, sur la parole du monothéisme pur, sur la religion de notre Prophète Muhammad (que la paix et le salut d'Allah soient sur lui) et sur la communauté de notre père Abraham, musulman orthodoxe qui ne fut point du nombre des polythéistes",
+                category: "morning",
+                time: "Matin (1 fois)"
+            },
+            {
+                title: "Ayat Al-Kursi",
+                arabic: "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+                translation: "Allah! Point de divinité à part Lui, le Vivant, Celui qui subsiste par lui-même. Ni somnolence ni sommeil ne Le saisissent. À Lui appartient tout ce qui est dans les cieux et sur la terre. Qui peut intercéder auprès de Lui sans Sa permission? Il connaît leur passé et leur futur. Et, de Sa science, ils n'embrassent que ce qu'Il veut. Son Trône déborde les cieux et la terre, dont la garde ne Lui coûte aucune peine. Et Il est le Très Haut, le Très Grand",
+                category: "morning",
+                time: "Matin/Soir (1 fois)"
+            },
+            {
+                title: "Sourate Al-Ikhlas",
+                arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",
+                translation: "Dis: «Il est Allah, Unique. Allah, Le Seul à être imploré pour ce que nous désirons. Il n'a jamais engendré, n'a pas été engendré non plus. Et nul n'est égal à Lui»",
+                category: "morning",
+                time: "Matin/Soir (3 fois)"
+            },
+            {
+                title: "Sourate Al-Falaq",
+                arabic: "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+                translation: "Dis: «Je cherche protection auprès du Seigneur de l'aube naissante, contre le mal des êtres qu'Il a créés, contre le mal de l'obscurité quand elle s'approfondit, contre le mal de celles qui soufflent sur les nœuds, et contre le mal de l'envieux quand il envie»",
+                category: "morning",
+                time: "Matin/Soir (3 fois)"
+            },
+            {
+                title: "Sourate An-Nas",
+                arabic: "قُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ",
+                translation: "Dis: «Je cherche protection auprès du Seigneur des hommes. Le Souverain des hommes, Dieu des hommes, contre le mal du mauvais conseiller, furtif, qui souffle le mal dans les poitrines des hommes, qu'il (le conseiller) soit un djinn, ou un être humain»",
+                category: "morning",
+                time: "Matin/Soir (3 fois)"
+            },
+            {
+                title: "Tasbih du matin",
+                arabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+                translation: "Gloire et pureté à Allah, et louange à Lui",
+                category: "morning",
+                time: "Matin (100 fois)"
+            },
+            {
+                title: "La Hawla wa la Quwwata",
+                arabic: "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+                translation: "Il n'y a de force et de puissance qu'en Allah",
+                category: "morning",
+                time: "Matin (100 fois)"
+            },
+            // Invocations du soir (Adhkar Al-Masa)
+            {
+                title: "Invocation du soir - 1",
+                arabic: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+                translation: "Nous voici au soir et le royaume appartient à Allah. Louange à Allah. Il n'y a de divinité qu'Allah Seul, sans associé. À Lui la royauté, à Lui la louange et Il est capable de toute chose",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Invocation du soir - 2",
+                arabic: "رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+                translation: "Seigneur, je Te demande le bien de cette nuit et le bien de ce qui vient après. Je cherche refuge auprès de Toi contre le mal de cette nuit et le mal de ce qui vient après. Seigneur, je cherche refuge auprès de Toi contre la paresse et la sénilité. Seigneur, je cherche refuge auprès de Toi contre le châtiment du Feu et le châtiment de la tombe",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Invocation du soir - 3",
+                arabic: "اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ أَصْبَحْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ الْمَصِيرُ",
+                translation: "Ô Allah, c'est par Toi que nous entrons dans la soirée, par Toi que nous entrons dans la matinée, par Toi que nous vivons, par Toi que nous mourons et vers Toi est le retour",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Invocation du soir - 4",
+                arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+                translation: "Ô Allah, Tu es mon Seigneur, il n'y a de divinité que Toi. Tu m'as créé et je suis Ton serviteur. Je respecte Ton pacte et Ta promesse autant que je le peux. Je cherche refuge auprès de Toi contre le mal que j'ai commis. Je reconnais Tes bienfaits sur moi et je reconnais mes péchés. Pardonne-moi car nul autre que Toi ne pardonne les péchés",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Invocation du soir - 5",
+                arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+                translation: "Ô Allah, je Te demande la santé dans ce monde et dans l'au-delà. Ô Allah, je Te demande le pardon et la santé dans ma religion, ma vie d'ici-bas, ma famille et mes biens. Ô Allah, cache mes défauts et rassure-moi de mes frayeurs. Ô Allah, protège-moi devant moi, derrière moi, à ma droite, à ma gauche et au-dessus de moi. Je cherche refuge dans Ta grandeur pour ne pas être englouti par en-dessous",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Invocation du soir - 6",
+                arabic: "اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ",
+                translation: "Ô Allah, Connaisseur de l'invisible et du visible, Créateur des cieux et de la terre, Seigneur et Souverain de toute chose, j'atteste qu'il n'y a de divinité que Toi. Je cherche refuge auprès de Toi contre le mal de mon âme, contre le mal du diable et son polythéisme",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Invocation du soir - 7",
+                arabic: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+                translation: "Au nom d'Allah, avec le nom duquel rien sur terre ni dans le ciel ne peut nuire, et Il est l'Audient, l'Omniscient",
+                category: "evening",
+                time: "Soir (3 fois)"
+            },
+            {
+                title: "Invocation du soir - 8",
+                arabic: "رَضِيتُ بِاللَّهِ رَبًّا وَبِالْإِسْلَامِ دِينًا وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ رَسُولًا",
+                translation: "J'agrée Allah comme Seigneur, l'Islam comme religion et Muhammad (que la paix et le salut d'Allah soient sur lui) comme Messager",
+                category: "evening",
+                time: "Soir (3 fois)"
+            },
+            {
+                title: "Invocation du soir - 9",
+                arabic: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي دِينِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ",
+                translation: "Ô Vivant, ô Subsistant par Toi-même, par Ta miséricorde j'implore Ton secours. Réforme pour moi toute ma religion et ne m'abandonne pas à moi-même ne serait-ce que le temps d'un clin d'œil",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Invocation du soir - 10",
+                arabic: "أَمْسَيْنَا عَلَى فِطْرَةِ الْإِسْلَامِ وَعَلَى كَلِمَةِ الْإِخْلَاصِ وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ",
+                translation: "Nous voici au soir sur la nature primordiale de l'Islam, sur la parole du monothéisme pur, sur la religion de notre Prophète Muhammad (que la paix et le salut d'Allah soient sur lui) et sur la communauté de notre père Abraham, musulman orthodoxe qui ne fut point du nombre des polythéistes",
+                category: "evening",
+                time: "Soir (1 fois)"
+            },
+            {
+                title: "Tasbih du soir",
+                arabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+                translation: "Gloire et pureté à Allah, et louange à Lui",
+                category: "evening",
+                time: "Soir (100 fois)"
+            },
+            {
+                title: "Istighfar du soir",
+                arabic: "أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيَّ الْقَيُّومَ وَأَتُوبُ إِلَيْهِ",
+                translation: "Je demande pardon à Allah le Magnifique, il n'y a de divinité que Lui, le Vivant, Celui qui subsiste par Lui-même, et je me repens à Lui",
+                category: "evening",
+                time: "Soir (100 fois)"
+            },
+            // Invocations avant la prière
+            {
+                title: "Avant la prière - Adhan",
+                arabic: "اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ أَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ حَيَّ عَلَى الصَّلَاةِ حَيَّ عَلَى الْفَلَاحِ اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ لَا إِلَهَ إِلَّا اللَّهُ",
+                translation: "Allah est le plus Grand, Allah est le plus Grand. J'atteste qu'il n'y a de divinité qu'Allah. J'atteste que Muhammad est le Messager d'Allah. Venez à la prière, venez au succès. Allah est le plus Grand, Allah est le plus Grand. Il n'y a de divinité qu'Allah",
+                category: "prayer",
+                time: "Avant chaque prière"
+            },
+            {
+                title: "Après l'Adhan",
+                arabic: "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ",
+                translation: "Ô Allah, Seigneur de cet appel parfait et de cette prière qui va être établie, accorde à Muhammad l'intercession et la vertu, et ressuscite-le dans la position louable que Tu lui as promise",
+                category: "prayer",
+                time: "Après l'Adhan"
+            },
+            // Invocations pendant la prière
+            {
+                title: "Takbirat Al-Ihram",
+                arabic: "اللَّهُ أَكْبَرُ",
+                translation: "Allah est le plus Grand",
+                category: "prayer",
+                time: "Début de prière"
+            },
+            {
+                title: "Dua Al-Istiftah",
+                arabic: "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا إِلَهَ غَيْرُكَ",
+                translation: "Gloire et pureté à Toi, ô Allah, et louange à Toi. Béni soit Ton nom, élevée soit Ta majesté et il n'y a de divinité en dehors de Toi",
+                category: "prayer",
+                time: "Après Takbir"
+            },
+            {
+                title: "Tashahhud",
+                arabic: "التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ",
+                translation: "Les salutations sont pour Allah, ainsi que les prières et les bonnes œuvres. Que la paix soit sur toi, ô Prophète, ainsi que la miséricorde d'Allah et Ses bénédictions. Que la paix soit sur nous et sur les serviteurs vertueux d'Allah. J'atteste qu'il n'y a de divinité qu'Allah et j'atteste que Muhammad est Son serviteur et Son messager",
+                category: "prayer",
+                time: "Tashahhud"
+            },
+            // Invocations après la prière
+            {
+                title: "Après la prière - Istighfar",
+                arabic: "أَسْتَغْفِرُ اللَّهَ أَسْتَغْفِرُ اللَّهَ أَسْتَغْفِرُ اللَّهَ اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+                translation: "Je demande pardon à Allah (3 fois). Ô Allah, Tu es la Paix et de Toi vient la paix. Béni sois-Tu, ô Détenteur de la majesté et de la générosité",
+                category: "after_prayer",
+                time: "Après chaque prière"
+            },
+            {
+                title: "Tasbih après prière",
+                arabic: "سُبْحَانَ اللَّهِ (33 مرة) الْحَمْدُ لِلَّهِ (33 مرة) اللَّهُ أَكْبَرُ (34 مرة)",
+                translation: "Gloire à Allah (33 fois), Louange à Allah (33 fois), Allah est le plus Grand (34 fois)",
+                category: "after_prayer",
+                time: "Après chaque prière"
+            },
+            // Invocations pour manger
+            {
+                title: "Avant de manger",
+                arabic: "بِسْمِ اللَّهِ",
+                translation: "Au nom d'Allah",
+                category: "eating",
+                time: "Avant le repas"
+            },
+            {
+                title: "Après avoir mangé",
+                arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ",
+                translation: "Louange à Allah qui m'a donné cette nourriture et me l'a accordée sans que j'aie de force ni de pouvoir",
+                category: "eating",
+                time: "Après le repas"
+            },
+            // Invocations de voyage
+            {
+                title: "En sortant de la maison",
+                arabic: "بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+                translation: "Au nom d'Allah, je place ma confiance en Allah, il n'y a de force et de puissance qu'en Allah",
+                category: "travel",
+                time: "En sortant"
+            },
+            {
+                title: "En entrant dans la maison",
+                arabic: "بِسْمِ اللَّهِ وَلَجْنَا وَبِسْمِ اللَّهِ خَرَجْنَا وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا",
+                translation: "Au nom d'Allah nous entrons, au nom d'Allah nous sortons, et en Allah notre Seigneur nous plaçons notre confiance",
+                category: "travel",
+                time: "En entrant"
+            },
+            // Invocations du coucher
+            {
+                title: "Avant de dormir",
+                arabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
+                translation: "En Ton nom, ô Allah, je meurs et je vis",
+                category: "sleep",
+                time: "Avant de dormir"
+            },
+            {
+                title: "Au réveil",
+                arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+                translation: "Louange à Allah qui nous a redonné la vie après nous avoir fait mourir et c'est vers Lui que se fera la résurrection",
+                category: "sleep",
+                time: "Au réveil"
+            }
+        ];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            if (currentUser) {
+                showMainInterface();
+            } else {
+                showRegistrationScreen();
+            }
+            
+            // Gestion du formulaire d'inscription
+            document.getElementById('registrationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleRegistration();
+            });
+            
+            // Gestion du formulaire de connexion
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleLogin();
+            });
+            
+            updateTasbihCounts();
+            updateProgress();
+            generateSurahList();
+            loadQuranContent();
+            loadDailyDuas();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+
+        // Gestion de l'inscription
+        function handleRegistration() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const quranLevel = document.getElementById('quranLevel').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const acceptTerms = document.getElementById('acceptTerms').checked;
+
+            if (!acceptTerms) {
+                alert('Veuillez accepter les conditions d\'utilisation');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('Les mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Le mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            // Créer l'utilisateur
+            const user = {
+                firstName,
+                lastName,
+                quranLevel,
+                password,
+                registrationDate: new Date().toISOString(),
+                progress: {
+                    versesRead: 0,
+                    hadithsStudied: 0,
+                    quizzesTaken: 0
+                }
+            };
+
+            // Sauvegarder dans localStorage
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            currentUser = user;
+
+            // Afficher l'interface principale
+            showMainInterface();
+            
+            // Message de bienvenue
+            setTimeout(() => {
+                alert(`Bienvenue ${firstName} ! Votre compte a été créé avec succès. Qu'Allah bénisse votre apprentissage ! 🤲`);
+            }, 500);
+        }
+
+        // Gestion de la connexion
+        function handleLogin() {
+            const firstName = document.getElementById('loginFirstName').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const savedUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!savedUser) {
+                alert('Aucun compte trouvé. Veuillez vous inscrire d\'abord.');
+                showRegistrationForm();
+                return;
+            }
+
+            if (savedUser.firstName === firstName && savedUser.password === password) {
+                currentUser = savedUser;
+                showMainInterface();
+                setTimeout(() => {
+                    alert(`Bienvenue de retour ${firstName} ! Continuons votre apprentissage 📚`);
+                }, 500);
+            } else {
+                alert('Prénom ou mot de passe incorrect');
+            }
+        }
+
+        // Afficher l'écran d'inscription
+        function showRegistrationScreen() {
+            document.getElementById('registrationScreen').classList.remove('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainInterface').classList.add('hidden');
+        }
+
+        // Afficher l'écran de connexion
+        function showLoginForm() {
+            document.getElementById('registrationScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainInterface').classList.add('hidden');
+        }
+
+        // Afficher le formulaire d'inscription depuis la connexion
+        function showRegistrationForm() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registrationScreen').classList.remove('hidden');
+            document.getElementById('mainInterface').classList.add('hidden');
+        }
+
+        // Afficher l'interface principale
+        function showMainInterface() {
+            document.getElementById('registrationScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainInterface').classList.remove('hidden');
+            
+            // Mettre à jour l'affichage avec les données utilisateur
+            if (currentUser) {
+                updateUserDisplay();
+            }
+        }
+
+        // Mettre à jour l'affichage utilisateur
+        function updateUserDisplay() {
+            // Vous pouvez ajouter ici des éléments pour afficher le nom de l'utilisateur
+            // Par exemple dans le header
+        }
+
+        // Déconnexion
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                localStorage.removeItem('currentUser');
+                currentUser = null;
+                showRegistrationScreen();
+            }
+        }
+
+        // Gestion des onglets
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.classList.remove('tab-active');
+                tab.classList.add('text-gray-600', 'hover:text-green-600');
+            });
+            
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.add('tab-active');
+            activeTab.classList.remove('text-gray-600', 'hover:text-green-600');
+            
+            currentTab = tabName;
+        }
+
+        // Génération de la liste des sourates
+        function generateSurahList() {
+            const surahList = document.getElementById('surahList');
+            const surahs = [
+                {number: 1, name: "Al-Fatiha", nameArabic: "الفاتحة"},
+                {number: 2, name: "Al-Baqarah", nameArabic: "البقرة"},
+                {number: 3, name: "Ali 'Imran", nameArabic: "آل عمران"},
+                {number: 4, name: "An-Nisa", nameArabic: "النساء"},
+                {number: 5, name: "Al-Ma'idah", nameArabic: "المائدة"},
+                {number: 6, name: "Al-An'am", nameArabic: "الأنعام"},
+                {number: 7, name: "Al-A'raf", nameArabic: "الأعراف"},
+                {number: 8, name: "Al-Anfal", nameArabic: "الأنفال"},
+                {number: 9, name: "At-Tawbah", nameArabic: "التوبة"},
+                {number: 10, name: "Yunus", nameArabic: "يونس"},
+                {number: 11, name: "Hud", nameArabic: "هود"},
+                {number: 12, name: "Yusuf", nameArabic: "يوسف"},
+                {number: 13, name: "Ar-Ra'd", nameArabic: "الرعد"},
+                {number: 14, name: "Ibrahim", nameArabic: "إبراهيم"},
+                {number: 15, name: "Al-Hijr", nameArabic: "الحجر"},
+                {number: 16, name: "An-Nahl", nameArabic: "النحل"},
+                {number: 17, name: "Al-Isra", nameArabic: "الإسراء"},
+                {number: 18, name: "Al-Kahf", nameArabic: "الكهف"},
+                {number: 19, name: "Maryam", nameArabic: "مريم"},
+                {number: 20, name: "Ta-Ha", nameArabic: "طه"},
+                {number: 21, name: "Al-Anbiya", nameArabic: "الأنبياء"},
+                {number: 22, name: "Al-Hajj", nameArabic: "الحج"},
+                {number: 23, name: "Al-Mu'minun", nameArabic: "المؤمنون"},
+                {number: 24, name: "An-Nur", nameArabic: "النور"},
+                {number: 25, name: "Al-Furqan", nameArabic: "الفرقان"},
+                {number: 26, name: "Ash-Shu'ara", nameArabic: "الشعراء"},
+                {number: 27, name: "An-Naml", nameArabic: "النمل"},
+                {number: 28, name: "Al-Qasas", nameArabic: "القصص"},
+                {number: 29, name: "Al-Ankabut", nameArabic: "العنكبوت"},
+                {number: 30, name: "Ar-Rum", nameArabic: "الروم"},
+                {number: 67, name: "Al-Mulk", nameArabic: "الملك"},
+                {number: 78, name: "An-Naba", nameArabic: "النبأ"},
+                {number: 79, name: "An-Nazi'at", nameArabic: "النازعات"},
+                {number: 80, name: "Abasa", nameArabic: "عبس"},
+                {number: 81, name: "At-Takwir", nameArabic: "التكوير"},
+                {number: 82, name: "Al-Infitar", nameArabic: "الإنفطار"},
+                {number: 83, name: "Al-Mutaffifin", nameArabic: "المطففين"},
+                {number: 84, name: "Al-Inshiqaq", nameArabic: "الإنشقاق"},
+                {number: 85, name: "Al-Buruj", nameArabic: "البروج"},
+                {number: 86, name: "At-Tariq", nameArabic: "الطارق"},
+                {number: 87, name: "Al-A'la", nameArabic: "الأعلى"},
+                {number: 88, name: "Al-Ghashiyah", nameArabic: "الغاشية"},
+                {number: 89, name: "Al-Fajr", nameArabic: "الفجر"},
+                {number: 90, name: "Al-Balad", nameArabic: "البلد"},
+                {number: 91, name: "Ash-Shams", nameArabic: "الشمس"},
+                {number: 92, name: "Al-Layl", nameArabic: "الليل"},
+                {number: 93, name: "Ad-Duha", nameArabic: "الضحى"},
+                {number: 94, name: "Ash-Sharh", nameArabic: "الشرح"},
+                {number: 95, name: "At-Tin", nameArabic: "التين"},
+                {number: 96, name: "Al-Alaq", nameArabic: "العلق"},
+                {number: 97, name: "Al-Qadr", nameArabic: "القدر"},
+                {number: 98, name: "Al-Bayyinah", nameArabic: "البينة"},
+                {number: 99, name: "Az-Zalzalah", nameArabic: "الزلزلة"},
+                {number: 100, name: "Al-Adiyat", nameArabic: "العاديات"},
+                {number: 101, name: "Al-Qari'ah", nameArabic: "القارعة"},
+                {number: 102, name: "At-Takathur", nameArabic: "التكاثر"},
+                {number: 103, name: "Al-Asr", nameArabic: "العصر"},
+                {number: 104, name: "Al-Humazah", nameArabic: "الهمزة"},
+                {number: 105, name: "Al-Fil", nameArabic: "الفيل"},
+                {number: 106, name: "Quraysh", nameArabic: "قريش"},
+                {number: 107, name: "Al-Ma'un", nameArabic: "الماعون"},
+                {number: 108, name: "Al-Kawthar", nameArabic: "الكوثر"},
+                {number: 109, name: "Al-Kafirun", nameArabic: "الكافرون"},
+                {number: 110, name: "An-Nasr", nameArabic: "النصر"},
+                {number: 111, name: "Al-Masad", nameArabic: "المسد"},
+                {number: 112, name: "Al-Ikhlas", nameArabic: "الإخلاص"},
+                {number: 113, name: "Al-Falaq", nameArabic: "الفلق"},
+                {number: 114, name: "An-Nas", nameArabic: "الناس"}
+            ];
+
+            surahList.innerHTML = surahs.map(surah => `
+                <button onclick="loadSurah(${surah.number})" class="w-full text-left p-3 hover:bg-green-50 rounded-lg transition-colors border-b border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-medium text-gray-800">${surah.number}. ${surah.name}</div>
+                            <div class="text-sm text-gray-600 arabic-text">${surah.nameArabic}</div>
+                        </div>
+                        <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                            ${surah.number}
+                        </div>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        // Charger une sourate
+        function loadSurah(surahNumber) {
+            currentSurah = surahNumber;
+            currentVerse = 1;
+            loadQuranContent();
+        }
+
+        // Charger le contenu du Coran
+        function loadQuranContent() {
+            const quranContent = document.getElementById('quranContent');
+            const currentSurahTitle = document.getElementById('currentSurahTitle');
+            
+            if (quranData[currentSurah]) {
+                const surah = quranData[currentSurah];
+                currentSurahTitle.textContent = `${surah.name} (${surah.translation})`;
+                
+                quranContent.innerHTML = surah.verses.map(verse => `
+                    <div class="verse-container p-6 rounded-lg mb-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                                ${verse.number}
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                Verset ${verse.number}
+                            </div>
+                        </div>
+                        <div class="arabic-text text-green-800 mb-4">
+                            ${verse.arabic}
+                        </div>
+                        <div class="text-gray-700">
+                            ${verse.translation}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                quranContent.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p>Cette sourate sera bientôt disponible insha'Allah</p>
+                        <p class="text-sm mt-2">En attendant, vous pouvez consulter les sourates disponibles</p>
+                    </div>
+                `;
+            }
+        }
+
+
+
+        // Navigation entre les versets
+        function previousVerse() {
+            if (currentVerse > 1) {
+                currentVerse--;
+                loadQuranContent();
+            }
+        }
+
+        function nextVerse() {
+            const surah = quranData[currentSurah];
+            if (surah && currentVerse < surah.verses.length) {
+                currentVerse++;
+                loadQuranContent();
+            }
+        }
+
+        // Gestion du Tasbih
+        function incrementTasbih(type) {
+            tasbihCounts[type]++;
+            localStorage.setItem(`${type}Count`, tasbihCounts[type]);
+            document.getElementById(`${type}Count`).textContent = tasbihCounts[type];
+        }
+
+        function resetTasbih(type) {
+            tasbihCounts[type] = 0;
+            localStorage.setItem(`${type}Count`, 0);
+            document.getElementById(`${type}Count`).textContent = 0;
+        }
+
+        function updateTasbihCounts() {
+            document.getElementById('subhanCount').textContent = tasbihCounts.subhan;
+            document.getElementById('hamdCount').textContent = tasbihCounts.hamd;
+            document.getElementById('takbirCount').textContent = tasbihCounts.takbir;
+        }
+
+        // Charger les invocations quotidiennes
+        function loadDailyDuas() {
+            const dailyDuas = document.getElementById('dailyDuas');
+            
+            // Grouper les invocations par catégorie
+            const categories = {
+                morning: "🌅 Invocations du Matin",
+                evening: "🌙 Invocations du Soir", 
+                prayer: "🕌 Invocations de Prière",
+                after_prayer: "📿 Après la Prière",
+                eating: "🍽️ Repas",
+                travel: "🚪 Déplacements",
+                sleep: "😴 Sommeil"
+            };
+            
+            let html = '';
+            
+            Object.keys(categories).forEach(category => {
+                const categoryDuas = duaData.filter(dua => dua.category === category);
+                if (categoryDuas.length > 0) {
+                    html += `
+                        <div class="mb-6">
+                            <h4 class="font-bold text-purple-800 mb-3 text-lg">${categories[category]}</h4>
+                            <div class="space-y-3">
+                                ${categoryDuas.map(dua => `
+                                    <div class="dua-container p-4 rounded-lg">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <h5 class="font-semibold text-purple-800">${dua.title}</h5>
+                                            <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">${dua.time}</span>
+                                        </div>
+                                        <div class="arabic-text text-purple-800 mb-2 text-lg leading-relaxed">${dua.arabic}</div>
+                                        <div class="text-sm text-gray-700 italic">${dua.translation}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            dailyDuas.innerHTML = html;
+        }
+
+        // Charger une collection de hadiths
+        function loadHadithCollection(collection) {
+            const hadithContent = document.getElementById('hadithContent');
+            
+            const hadiths = {
+                bukhari: {
+                    arabic: "مَن كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ",
+                    translation: "Que celui qui croit en Allah et au Jour dernier dise du bien ou qu'il se taise",
+                    narrator: "Abu Hurayra (qu'Allah l'agrée)",
+                    source: "Sahih Al-Bukhari"
+                },
+                muslim: {
+                    arabic: "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ",
+                    translation: "Le musulman est celui dont les musulmans sont à l'abri de sa langue et de sa main",
+                    narrator: "Abdullah ibn Amr (qu'Allah l'agrée)",
+                    source: "Sahih Muslim"
+                }
+            };
+
+            const hadith = hadiths[collection] || hadiths.bukhari;
+            
+            hadithContent.innerHTML = `
+                <div class="arabic-text text-orange-800 mb-4">${hadith.arabic}</div>
+                <div class="text-gray-700 mb-4">${hadith.translation}</div>
+                <div class="text-sm text-gray-600">
+                    <strong>Rapporté par:</strong> ${hadith.source}<br>
+                    <strong>Narrateur:</strong> ${hadith.narrator}
+                </div>
+            `;
+            
+            hadithsStudied++;
+            localStorage.setItem('hadithsStudied', hadithsStudied);
+            updateProgress();
+        }
+
+        // Charger une leçon
+        function loadLesson(topic) {
+            const lessonContent = document.getElementById('lessonContent');
+            
+            const lessons = {
+                aqida: {
+                    title: "Les Six Piliers de la Foi (Iman)",
+                    content: `
+                        <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-6 mb-6">
+                            <h4 class="text-xl font-bold mb-4">أركان الإيمان الستة</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>1. الإيمان بالله - La foi en Allah</div>
+                                <div>2. الإيمان بالملائكة - La foi aux anges</div>
+                                <div>3. الإيمان بالكتب - La foi aux Livres révélés</div>
+                                <div>4. الإيمان بالرسل - La foi aux Messagers</div>
+                                <div>5. الإيمان باليوم الآخر - La foi au Jour dernier</div>
+                                <div>6. الإيمان بالقدر - La foi au Destin</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed">
+                            Ces six piliers constituent les fondements de la croyance islamique. 
+                            Chaque musulman doit y croire fermement pour que sa foi soit complète...
+                        </p>
+                    `
+                },
+                fiqh: {
+                    title: "Les Règles de Purification",
+                    content: `
+                        <div class="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg p-6 mb-6">
+                            <h4 class="text-xl font-bold mb-4">الطهارة في الإسلام</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>• الوضوء - Les ablutions mineures</div>
+                                <div>• الغسل - Les ablutions majeures</div>
+                                <div>• التيمم - Les ablutions sèches</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed">
+                            La purification est une condition essentielle pour la validité de la prière. 
+                            Elle comprend la purification du corps, des vêtements et du lieu de prière...
+                        </p>
+                    `
+                }
+            };
+
+            const lesson = lessons[topic] || lessons.aqida;
+            lessonContent.innerHTML = lesson.content;
+        }
+
+        // Démarrer un quiz
+        function startQuiz(type) {
+            const quizContainer = document.getElementById('quizContainer');
+            
+            const questions = {
+                quran: [
+                    {
+                        question: "Combien de sourates contient le Coran ?",
+                        options: ["114", "115", "113", "116"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quelle est la première sourate révélée ?",
+                        options: ["Al-Fatiha", "Al-Alaq", "Al-Muddathir", "An-Nas"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien de versets contient la sourate Al-Fatiha ?",
+                        options: ["6", "7", "8", "9"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quelle sourate est appelée 'le cœur du Coran' ?",
+                        options: ["Al-Fatiha", "Yasin", "Al-Baqarah", "Al-Ikhlas"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien de versets contient le Coran au total ?",
+                        options: ["6236", "6666", "6000", "7000"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quelle est la plus longue sourate du Coran ?",
+                        options: ["Al-Fatiha", "Al-Baqarah", "Ali Imran", "An-Nisa"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quelle sourate ne commence pas par 'Bismillah' ?",
+                        options: ["At-Tawbah", "Al-Fatiha", "Al-Baqarah", "An-Nas"],
+                        correct: 0
+                    },
+                    {
+                        question: "Dans quelle sourate trouve-t-on Ayat Al-Kursi ?",
+                        options: ["Al-Fatiha", "Al-Baqarah", "Ali Imran", "An-Nisa"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien d'années a duré la révélation du Coran ?",
+                        options: ["20 ans", "23 ans", "25 ans", "30 ans"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quelle sourate est recommandée pour la protection ?",
+                        options: ["Al-Mulk", "Al-Falaq", "An-Nas", "Toutes les réponses"],
+                        correct: 3
+                    },
+                    {
+                        question: "Dans quelle ville le Coran a-t-il commencé à être révélé ?",
+                        options: ["Médine", "La Mecque", "Jérusalem", "Taif"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quelle sourate parle de l'histoire de Yusuf (Joseph) ?",
+                        options: ["Yusuf", "Ibrahim", "Musa", "Isa"],
+                        correct: 0
+                    },
+                    {
+                        question: "Combien de fois le nom 'Allah' apparaît-il dans le Coran ?",
+                        options: ["2698", "2500", "3000", "2800"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quelle sourate est appelée 'la mariée du Coran' ?",
+                        options: ["Ar-Rahman", "Al-Baqarah", "Yasin", "Al-Mulk"],
+                        correct: 0
+                    },
+                    {
+                        question: "Dans quelle sourate trouve-t-on le verset de la lumière ?",
+                        options: ["An-Nur", "Al-Baqarah", "Ali Imran", "An-Nisa"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quelle est la plus courte sourate du Coran ?",
+                        options: ["Al-Asr", "Al-Kawthar", "Al-Ikhlas", "An-Nasr"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien de prophètes sont mentionnés dans le Coran ?",
+                        options: ["25", "20", "30", "15"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quelle sourate parle des gens de la caverne ?",
+                        options: ["Al-Kahf", "Al-Anfal", "At-Tawbah", "Yunus"],
+                        correct: 0
+                    },
+                    {
+                        question: "Dans quelle sourate trouve-t-on l'histoire de Maryam ?",
+                        options: ["Maryam", "Ali Imran", "An-Nisa", "Toutes les réponses"],
+                        correct: 3
+                    },
+                    {
+                        question: "Quelle sourate est recommandée à lire le vendredi ?",
+                        options: ["Al-Kahf", "Yasin", "Al-Mulk", "Ar-Rahman"],
+                        correct: 0
+                    }
+                ],
+                hadith: [
+                    {
+                        question: "Qui a compilé le Sahih Al-Bukhari ?",
+                        options: ["Imam Muslim", "Imam Al-Bukhari", "Imam At-Tirmidhi", "Imam Ahmad"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien de hadiths contient le Sahih Al-Bukhari ?",
+                        options: ["7563", "7000", "8000", "6000"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quel est le premier hadith du Sahih Al-Bukhari ?",
+                        options: ["Les actions par les intentions", "La foi", "La prière", "La zakat"],
+                        correct: 0
+                    },
+                    {
+                        question: "Qui a compilé le Sahih Muslim ?",
+                        options: ["Imam Al-Bukhari", "Imam Muslim", "Imam At-Tirmidhi", "Imam Abu Dawud"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien y a-t-il de collections principales de hadiths ?",
+                        options: ["4", "5", "6", "7"],
+                        correct: 2
+                    },
+                    {
+                        question: "Quel compagnon a rapporté le plus de hadiths ?",
+                        options: ["Abu Bakr", "Omar", "Abu Hurayra", "Ali"],
+                        correct: 2
+                    },
+                    {
+                        question: "Que signifie 'Sahih' dans Sahih Al-Bukhari ?",
+                        options: ["Authentique", "Complet", "Premier", "Important"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quel hadith parle de l'Islam, l'Iman et l'Ihsan ?",
+                        options: ["Hadith de Jibril", "Hadith des intentions", "Hadith de la foi", "Hadith de la prière"],
+                        correct: 0
+                    },
+                    {
+                        question: "Qui a compilé le Jami' At-Tirmidhi ?",
+                        options: ["Imam At-Tirmidhi", "Imam An-Nasa'i", "Imam Ibn Majah", "Imam Abu Dawud"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quel hadith dit 'Le musulman est celui dont les musulmans sont à l'abri' ?",
+                        options: ["Rapporté par Al-Bukhari", "Rapporté par Muslim", "Rapporté par At-Tirmidhi", "Toutes les réponses"],
+                        correct: 3
+                    },
+                    {
+                        question: "Combien de degrés a la foi selon un hadith célèbre ?",
+                        options: ["70", "60", "80", "50"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quel hadith parle des signes de l'hypocrite ?",
+                        options: ["3 signes", "4 signes", "5 signes", "2 signes"],
+                        correct: 0
+                    },
+                    {
+                        question: "Selon un hadith, quelle est la meilleure des générations ?",
+                        options: ["La mienne", "Puis celle qui la suit", "Puis celle qui la suit", "Toutes les réponses"],
+                        correct: 3
+                    },
+                    {
+                        question: "Quel hadith parle de la construction de la mosquée ?",
+                        options: ["Hadith de Quba", "Hadith de Médine", "Hadith du Prophète", "Hadith des Ansars"],
+                        correct: 0
+                    },
+                    {
+                        question: "Selon un hadith, combien de récompenses pour chaque lettre du Coran ?",
+                        options: ["1", "10", "100", "1000"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quel hadith parle de l'importance de la science ?",
+                        options: ["Cherchez la science", "La science est obligatoire", "Du berceau à la tombe", "Toutes les réponses"],
+                        correct: 3
+                    },
+                    {
+                        question: "Selon un hadith, quelle est la meilleure aumône ?",
+                        options: ["En secret", "Celle du nécessiteux", "Celle de la main droite", "Toutes les réponses"],
+                        correct: 3
+                    },
+                    {
+                        question: "Quel hadith parle des 99 noms d'Allah ?",
+                        options: ["Celui qui les mémorise", "Celui qui les récite", "Celui qui les comprend", "Toutes les réponses"],
+                        correct: 0
+                    },
+                    {
+                        question: "Selon un hadith, combien de fois pardonner ?",
+                        options: ["7 fois", "70 fois", "77 fois", "Sans limite"],
+                        correct: 3
+                    },
+                    {
+                        question: "Quel hadith parle de la visite des malades ?",
+                        options: ["Récompense divine", "Prière des anges", "Pardon des péchés", "Toutes les réponses"],
+                        correct: 3
+                    }
+                ],
+                general: [
+                    {
+                        question: "Combien de fois par jour un musulman doit-il prier ?",
+                        options: ["3", "4", "5", "6"],
+                        correct: 2
+                    },
+                    {
+                        question: "Quels sont les cinq piliers de l'Islam ?",
+                        options: ["Shahada, Salat, Zakat, Sawm, Hajj", "Foi, Prière, Jeûne, Aumône, Pèlerinage", "Attestation, Prière, Zakat, Ramadan, Mecque", "Toutes les réponses"],
+                        correct: 3
+                    },
+                    {
+                        question: "Quel est le premier pilier de l'Islam ?",
+                        options: ["La prière", "La Shahada", "Le jeûne", "L'aumône"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien de fois faut-il faire le Hajj dans sa vie ?",
+                        options: ["1 fois si on en a les moyens", "2 fois", "3 fois", "Chaque année"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quel mois est le mois du jeûne ?",
+                        options: ["Ramadan", "Shawwal", "Dhul Hijjah", "Muharram"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quelle est la direction de la prière ?",
+                        options: ["Vers l'est", "Vers la Mecque", "Vers Médine", "Vers Jérusalem"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien de rakats dans la prière de Fajr ?",
+                        options: ["2", "3", "4", "1"],
+                        correct: 0
+                    },
+                    {
+                        question: "Quel pourcentage de ses biens doit-on donner en Zakat ?",
+                        options: ["2.5%", "5%", "10%", "1%"],
+                        correct: 0
+                    },
+                    {
+                        question: "Combien d'anges gardiens a chaque personne ?",
+                        options: ["1", "2", "3", "4"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quel est le dernier prophète envoyé ?",
+                        options: ["Isa (Jésus)", "Musa (Moïse)", "Muhammad", "Ibrahim (Abraham)"],
+                        correct: 2
+                    },
+                    {
+                        question: "Dans quelle ville est née le Prophète Muhammad ?",
+                        options: ["Médine", "La Mecque", "Jérusalem", "Damas"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quel âge avait le Prophète quand il a reçu la première révélation ?",
+                        options: ["35 ans", "40 ans", "45 ans", "30 ans"],
+                        correct: 1
+                    },
+                    {
+                        question: "Comment s'appelle la migration du Prophète vers Médine ?",
+                        options: ["Hijra", "Isra", "Miraj", "Umrah"],
+                        correct: 0
+                    },
+                    {
+                        question: "Combien d'épouses a eu le Prophète Muhammad ?",
+                        options: ["9", "11", "13", "15"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quel est le nom du père du Prophète ?",
+                        options: ["Abdullah", "Abu Talib", "Abdul Muttalib", "Abu Bakr"],
+                        correct: 0
+                    },
+                    {
+                        question: "Comment s'appelle la première épouse du Prophète ?",
+                        options: ["Aisha", "Khadija", "Hafsa", "Zaynab"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quel compagnon était surnommé 'As-Siddiq' (le Véridique) ?",
+                        options: ["Omar", "Abu Bakr", "Othman", "Ali"],
+                        correct: 1
+                    },
+                    {
+                        question: "Combien de califes bien-guidés y a-t-il eu ?",
+                        options: ["3", "4", "5", "6"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quel jour de la semaine est saint pour les musulmans ?",
+                        options: ["Samedi", "Dimanche", "Vendredi", "Jeudi"],
+                        correct: 2
+                    },
+                    {
+                        question: "Combien de fois le mot 'Ramadan' apparaît-il dans le Coran ?",
+                        options: ["1", "2", "3", "5"],
+                        correct: 0
+                    }
+                ]
+            };
+
+            let currentQuestion = 0;
+            let score = 0;
+            const quizQuestions = questions[type] || questions.general;
+
+            function displayQuestion() {
+                const q = quizQuestions[currentQuestion];
+                quizContainer.innerHTML = `
+                    <div class="max-w-2xl mx-auto">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-600">Question ${currentQuestion + 1} sur ${quizQuestions.length}</span>
+                                <span class="text-sm text-gray-600">Score: ${score}/${currentQuestion}</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full transition-all" style="width: ${((currentQuestion + 1) / quizQuestions.length) * 100}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-6 mb-6">
+                            <h4 class="text-xl font-bold">${q.question}</h4>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            ${q.options.map((option, index) => `
+                                <button onclick="selectQuizAnswer(${index})" class="w-full text-left p-4 border border-gray-300 rounded-lg hover:bg-green-50 hover:border-green-300 transition-all">
+                                    <span class="font-medium">${String.fromCharCode(65 + index)}.</span> ${option}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            window.selectQuizAnswer = function(selectedIndex) {
+                const q = quizQuestions[currentQuestion];
+                const isCorrect = selectedIndex === q.correct;
+                
+                if (isCorrect) score++;
+                
+                const buttons = quizContainer.querySelectorAll('button');
+                buttons.forEach((btn, index) => {
+                    if (index === q.correct) {
+                        btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                    } else if (index === selectedIndex && !isCorrect) {
+                        btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                    }
+                    btn.disabled = true;
+                });
+                
+                setTimeout(() => {
+                    currentQuestion++;
+                    if (currentQuestion < quizQuestions.length) {
+                        displayQuestion();
+                    } else {
+                        showQuizResults();
+                    }
+                }, 1500);
+            };
+
+            function showQuizResults() {
+                const percentage = Math.round((score / quizQuestions.length) * 100);
+                let message = '';
+                
+                if (percentage >= 80) message = 'ماشاء الله! Excellent! 🎉';
+                else if (percentage >= 60) message = 'بارك الله فيك! Bien joué! 👍';
+                else message = 'Continuez à apprendre! 📚';
+                
+                quizContainer.innerHTML = `
+                    <div class="text-center max-w-md mx-auto">
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-8 mb-6">
+                            <h3 class="text-2xl font-bold mb-4">Quiz Terminé!</h3>
+                            <div class="text-4xl font-bold mb-2">${score}/${quizQuestions.length}</div>
+                            <div class="text-xl">${percentage}%</div>
+                        </div>
+                        <p class="text-xl font-semibold text-green-600 mb-6">${message}</p>
+                        <button onclick="startQuiz('${type}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                            🔄 Nouveau Quiz
+                        </button>
+                    </div>
+                `;
+            }
+
+            displayQuestion();
+        }
+
+        // Mettre à jour les statistiques
+        function updateProgress() {
+            const versesRead = currentUser ? currentUser.progress.versesRead : 0;
+            const totalVerses = 6236; // Nombre total de versets dans le Coran
+            const quranProgressPercent = Math.min((versesRead / totalVerses) * 100, 100);
+            
+            document.getElementById('quranProgress').textContent = `${Math.round(quranProgressPercent)}%`;
+            document.getElementById('quranProgressBar').style.width = `${quranProgressPercent}%`;
+            
+            document.getElementById('hadithProgress').textContent = hadithsStudied;
+            const hadithProgressPercent = Math.min((hadithsStudied / 100) * 100, 100);
+            document.getElementById('hadithProgressBar').style.width = `${hadithProgressPercent}%`;
+        }
+
+        // Fonctions Qibla GPS
+        let userLatitude = null;
+        let userLongitude = null;
+        let qiblaAngle = null;
+
+        // Afficher le modal Qibla
+        function showQiblaFinder() {
+            const modal = document.getElementById('qiblaModal');
+            modal.classList.remove('hidden');
+            getCurrentLocation();
+        }
+
+        // Fermer le modal Qibla
+        function closeQiblaModal() {
+            document.getElementById('qiblaModal').classList.add('hidden');
+        }
+
+        // Obtenir la position actuelle
+        function getCurrentLocation() {
+            const locationElement = document.getElementById('userLocation');
+            locationElement.textContent = 'Localisation en cours...';
+
+            if (!navigator.geolocation) {
+                locationElement.textContent = 'Géolocalisation non supportée par ce navigateur';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    userLatitude = position.coords.latitude;
+                    userLongitude = position.coords.longitude;
+                    
+                    locationElement.innerHTML = `
+                        <div>📍 Position trouvée</div>
+                        <div class="text-xs mt-1">Lat: ${userLatitude.toFixed(4)}°, Lng: ${userLongitude.toFixed(4)}°</div>
+                    `;
+                    
+                    calculateQiblaDirection();
+                },
+                function(error) {
+                    let errorMessage = 'Erreur de géolocalisation';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Accès à la localisation refusé';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Position indisponible';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Délai d\'attente dépassé';
+                            break;
+                    }
+                    locationElement.textContent = errorMessage;
+                    
+                    // Position par défaut (Ziguinchor, Sénégal)
+                    userLatitude = 12.5681;
+                    userLongitude = -16.2719;
+                    locationElement.innerHTML = `
+                        <div>📍 Position par défaut</div>
+                        <div class="text-xs mt-1">Ziguinchor, Sénégal</div>
+                    `;
+                    calculateQiblaDirection();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
+        }
+
+        // Calculer la direction de la Qibla
+        function calculateQiblaDirection() {
+            if (!userLatitude || !userLongitude) return;
+
+            // Coordonnées de la Kaaba à La Mecque
+            const meccaLat = 21.4225;
+            const meccaLng = 39.8262;
+
+            // Conversion en radians
+            const lat1 = userLatitude * Math.PI / 180;
+            const lat2 = meccaLat * Math.PI / 180;
+            const deltaLng = (meccaLng - userLongitude) * Math.PI / 180;
+
+            // Calcul de l'angle de direction (bearing)
+            const y = Math.sin(deltaLng) * Math.cos(lat2);
+            const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
+            
+            let bearing = Math.atan2(y, x);
+            bearing = bearing * 180 / Math.PI;
+            bearing = (bearing + 360) % 360;
+
+            qiblaAngle = bearing;
+
+            // Calcul de la distance
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = (meccaLat - userLatitude) * Math.PI / 180;
+            const dLng = deltaLng;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1) * Math.cos(lat2) *
+                    Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+
+            // Mise à jour de l'affichage
+            document.getElementById('qiblaDirection').textContent = `${Math.round(bearing)}°`;
+            document.getElementById('qiblaAngle').textContent = `${Math.round(bearing)}°`;
+            document.getElementById('distanceToMecca').textContent = `${Math.round(distance)} km`;
+
+            // Rotation de la flèche
+            const arrow = document.getElementById('qiblaArrow');
+            arrow.style.transform = `translate(-50%, -50%) rotate(${bearing}deg)`;
+
+            // Animation de la boussole
+            const compass = document.getElementById('qiblaCompass');
+            compass.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                compass.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // Calibrer la boussole (simulation)
+        function calibrateCompass() {
+            const button = event.target;
+            const originalText = button.textContent;
+            
+            button.textContent = '🔄 Calibrage...';
+            button.disabled = true;
+            
+            // Simulation du calibrage
+            setTimeout(() => {
+                button.textContent = '✅ Calibré !';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                    
+                    // Recalculer la direction
+                    if (userLatitude && userLongitude) {
+                        calculateQiblaDirection();
+                    }
+                }, 1000);
+            }, 2000);
+        }
+
+        // Afficher le modal Boobadev avec les versets sensibles
+        function showBoobadevVerses() {
+            const modal = document.getElementById('boobadevModal');
+            const content = document.getElementById('boobadevContent');
+            
+            // Grouper les versets par catégorie
+            const categories = {};
+            boobadevVerses.forEach(verse => {
+                if (!categories[verse.category]) {
+                    categories[verse.category] = [];
+                }
+                categories[verse.category].push(verse);
+            });
+            
+            let html = '';
+            Object.keys(categories).forEach(category => {
+                html += `
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-purple-800 mb-4 border-b-2 border-purple-200 pb-2">
+                            ${category}
+                        </h3>
+                        <div class="space-y-6">
+                            ${categories[category].map(verse => `
+                                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border-l-4 border-purple-600 p-6 rounded-lg shadow-md">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <h4 class="font-bold text-purple-800 text-lg">
+                                            ${verse.surah} (${verse.surahArabic}) - Verset ${verse.verse}
+                                        </h4>
+                                        <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                            ${verse.verse}
+                                        </div>
+                                    </div>
+                                    <div class="arabic-text text-purple-900 mb-4 text-xl leading-relaxed bg-white p-4 rounded-lg shadow-inner">
+                                        ${verse.arabic}
+                                    </div>
+                                    <div class="text-gray-700 italic leading-relaxed bg-gray-50 p-4 rounded-lg">
+                                        "${verse.translation}"
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = html;
+            modal.classList.remove('hidden');
+        }
+
+        // Fermer le modal Boobadev
+        function closeBoobadevModal() {
+            document.getElementById('boobadevModal').classList.add('hidden');
+        }
+
+        // Mettre à jour l'heure et la date avec animation
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            
+            // Formatage de l'heure avec secondes pour l'animation
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Formatage de la date en français avec animation
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('fr-FR', options);
+            
+            // Formatage islamique (Hijri approximatif)
+            const hijriOptions = {
+                calendar: 'islamic',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            let hijriDate = '';
+            try {
+                hijriDate = now.toLocaleDateString('ar-SA', hijriOptions);
+            } catch (e) {
+                hijriDate = 'Date Hijri';
+            }
+            
+            // Déterminer la prochaine prière
+            let nextPrayer = '';
+            let timeToNext = '';
+            const prayerTimes = [
+                {name: 'Fajr', time: 5.5, display: '05:30'},
+                {name: 'Dhuhr', time: 13.25, display: '13:15'},
+                {name: 'Asr', time: 16.75, display: '16:45'},
+                {name: 'Maghrib', time: 18.5, display: '18:30'},
+                {name: 'Isha', time: 20, display: '20:00'}
+            ];
+            
+            const currentTime = hours + minutes / 60;
+            let found = false;
+            
+            for (let prayer of prayerTimes) {
+                if (currentTime < prayer.time) {
+                    nextPrayer = `${prayer.name} - ${prayer.display}`;
+                    const minutesToNext = Math.round((prayer.time - currentTime) * 60);
+                    const hoursToNext = Math.floor(minutesToNext / 60);
+                    const minsToNext = minutesToNext % 60;
+                    timeToNext = hoursToNext > 0 ? `dans ${hoursToNext}h ${minsToNext}min` : `dans ${minsToNext}min`;
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                nextPrayer = 'Fajr - 05:30';
+                const minutesToFajr = Math.round((24 - currentTime + 5.5) * 60);
+                const hoursToFajr = Math.floor(minutesToFajr / 60);
+                const minsToFajr = minutesToFajr % 60;
+                timeToNext = `dans ${hoursToFajr}h ${minsToFajr}min`;
+            }
+            
+            // Mise à jour des éléments avec animation
+            const timeElement = document.getElementById('currentTime');
+            const dateElement = document.getElementById('currentDate');
+            const prayerElement = document.getElementById('nextPrayer');
+            
+            if (timeElement.textContent !== timeString) {
+                timeElement.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    timeElement.style.transform = 'scale(1)';
+                }, 200);
+            }
+            
+            timeElement.textContent = timeString;
+            dateElement.innerHTML = `
+                <div>${dateString}</div>
+                <div class="text-xs text-green-600 mt-1">${hijriDate}</div>
+                <div class="text-xs text-gray-500 mt-1">${timeToNext}</div>
+            `;
+            prayerElement.textContent = nextPrayer;
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985c534432302941',t:'MTc1ODk4OTk5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
